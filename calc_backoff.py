@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
+from sympy import *
 from scipy.sparse import bsr_matrix
 
 AC0_PARAM = { 'aifsn':2, 'cw':(2,3) }
@@ -11,16 +12,24 @@ AC2_CW = lambda x: { 'aifsn':3, 'cw':(x,10) }
 AC3_CW = lambda x: { 'aifsn':7, 'cw':(x,10) }
 
 IDX2CW = lambda idx: 2**idx - 1
+_P = lambda x: max(x, 0)
 
 class User:
-    __slots__ = ('demand', 'aifsn', 'cw_idx', 'cw_max')
+    __counter = 0
+    __slots__ = ('name', 'arrival', 'mcs', 'aifsn', 'cw_idx', 'cw_max')
 
-    def __init__(self, param):
-        self.demand = float( param['demand'] )
+    def __init__(self, param, name=''):
+        self.name = name
+        if not name:
+            self.name = 'x_{}'.format(User.__counter)
+            User.__counter += 1
+
+        self.arrival = float( param['arrival'] )
+        self.mcs = float( param['mcs'] )
+
         self.aifsn  = int( param['aifsn'] )
         self.cw_idx = int( param['cw'][0] )
         self.cw_max = int( param['cw'][1] )
-        # self.cw_cur = -1
         pass
 
     @property
@@ -67,7 +76,37 @@ def collide(users:list, selection:list, prob_limit=1E-5):
     else:
         return (0.0, None)
     pass
-        
+
+def guess(users: list):
+
+    def guess_ab(demand_a, demand_b, user_a:User, user_b:User):
+        pa, cwa_len, cwa_s, cwa_t = demand_a, user_a.cw_size, *user_a.real_cw
+        pb, cwb_len, cwb_s, cwb_t = demand_b, user_b.cw_size, *user_b.real_cw
+        ##
+        prob_a = (1-pb)*pa # A always wins
+        for i in range(cwa_s,cwa_t+1):
+            prob_a += (pa*pb) / (cwa_len*cwb_len) * _P(cwb_t - i)
+            pass
+        ##
+        prob_b = (1-pa)*pb # B always wins
+        for i in range(cwb_s, cwb_t+1):
+            prob_b += (pa*pb) / (cwa_len*cwb_len) * _P(cwa_t - i)
+            pass
+        ##
+        return (prob_a, prob_b)
+    
+    num_users = len(users)
+    demands = [ 1 if u.arrival==0 else symbols(u.name) for u in users ]
+    print(demands)
+
+    prob_ratio = [0] * (num_users-1)
+    for i in range(num_users-1):
+        _prob_a, _prob_b = guess_ab(demands[0], demands[i], users[0], users[i+1])
+        print(_prob_a, _prob_b)
+        prob_ratio[i] = _prob_b / _prob_a
+
+    pass
+
 def go_through(users, run_event, depth=0):
     num_users = len(users)
     result = run_event(users)
@@ -81,15 +120,14 @@ def go_through(users, run_event, depth=0):
     ##
     return result
 
-
-
 def run_event(users) -> float:
     return 0.0
 
 if __name__=='__main__':
     users = [
-        User({ **AC2_PARAM, 'demand':1.0 }),
-        User({ **AC2_PARAM, 'demand':1.0 }),
+        User({ **AC2_PARAM, 'arrival':0.5, 'mcs':54 }),
+        User({ **AC2_PARAM, 'arrival':0.5, 'mcs':54 }),
     ]
-    prob = go_through(users, run_event)
+    # prob = go_through(users, run_event)
+    prob = guess(users)
     print(prob)
