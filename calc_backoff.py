@@ -97,12 +97,10 @@ def guess(users: list):
     
     num_users = len(users)
     demands = [ 1 if u.arrival==0 else symbols(u.name) for u in users ]
-    print(demands)
 
     prob_ratio = [0] * (num_users-1)
     for i in range(num_users-1):
-        _prob_a, _prob_b = guess_ab(demands[0], demands[i], users[0], users[i+1])
-        print(_prob_a, _prob_b)
+        _prob_a, _prob_b = guess_ab(demands[0], demands[i+1], users[0], users[i+1])
         prob_ratio[i] = _prob_b / _prob_a
 
     pass
