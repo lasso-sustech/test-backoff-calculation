@@ -136,7 +136,7 @@ def run_event(users) -> float:
 if __name__=='__main__':
     users = [
         User({ **AC2_PARAM, 'arrival':0, 'mcs':54 }),
-        User({ **AC2_CW(8), 'arrival':0, 'mcs':54 }),
+        User({ **AC2_CW(4), 'arrival':0, 'mcs':54 }),
     ]
     # prob = go_through(users, run_event)
     prob = guess(users)
