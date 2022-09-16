@@ -79,7 +79,7 @@ def collide(users:list, selection:list, prob_limit=1E-5):
 
 def guess(users: list):
 
-    def guess_ab(demand_a, demand_b, user_a:User, user_b:User):
+    def guess_ab(demand_a, demand_b, user_a:User, user_b:User): #FIXME: use uniform guess is not acceptable
         pa, cwa_len, cwa_s, cwa_t = demand_a, user_a.cw_size, *user_a.real_cw
         pb, cwb_len, cwb_s, cwb_t = demand_b, user_b.cw_size, *user_b.real_cw
         ##
@@ -115,7 +115,7 @@ def guess(users: list):
     solutions = nonlinsolve(poly_eqs, _variables)
     print(solutions)
 
-    pass
+    return guess_ab(1, 1, users[0], users[1])
 
 def go_through(users, run_event, depth=0):
     num_users = len(users)
@@ -135,8 +135,8 @@ def run_event(users) -> float:
 
 if __name__=='__main__':
     users = [
-        User({ **AC2_PARAM, 'arrival':0.5, 'mcs':54 }),
-        User({ **AC2_PARAM, 'arrival':0.5, 'mcs':54 }),
+        User({ **AC2_PARAM, 'arrival':0, 'mcs':54 }),
+        User({ **AC2_CW(8), 'arrival':0, 'mcs':54 }),
     ]
     # prob = go_through(users, run_event)
     prob = guess(users)
