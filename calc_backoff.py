@@ -109,7 +109,7 @@ def guess(users: list):
     poly_eqs = list()
     for i,u in enumerate(users):
         if u.arrival:
-            poly_eqs.append( u.arrival/u.mcs - prob_ratio[i] ) #FIXME: check equality
+            poly_eqs.append( u.arrival/(u.mcs*prob_ratio[i]) - demands[i] )
 
     _variables =  [x for x in demands if x!=1 ]
     solutions = solve_poly_system(poly_eqs, *_variables)
