@@ -96,12 +96,24 @@ def guess(users: list):
         return (prob_a, prob_b)
     
     num_users = len(users)
-    demands = [ 1 if u.arrival==0 else symbols(u.name) for u in users ]
+    demands = [ symbols(u.name) if u.arrival else 1 for u in users ]
 
-    prob_ratio = [0] * (num_users-1)
+    prob_ratio = [1] * num_users
     for i in range(num_users-1):
         _prob_a, _prob_b = guess_ab(demands[0], demands[i+1], users[0], users[i+1])
-        prob_ratio[i] = _prob_b / _prob_a
+        prob_ratio[i+1] = _prob_b / _prob_a
+    ##
+    _sum_ratio = sum(prob_ratio)
+    prob_ratio = [x/_sum_ratio for x in prob_ratio]
+
+    poly_eqs = list()
+    for i,u in enumerate(users):
+        if u.arrival:
+            poly_eqs.append( u.arrival/u.mcs - prob_ratio[i] ) #FIXME: check equality
+
+    _variables =  [x for x in demands if x!=1 ]
+    solutions = solve_poly_system(poly_eqs, *_variables)
+    print(solutions)
 
     pass
 
