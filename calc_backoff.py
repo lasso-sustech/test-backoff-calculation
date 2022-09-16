@@ -111,8 +111,8 @@ def guess(users: list):
         if u.arrival:
             poly_eqs.append( u.arrival/(u.mcs*prob_ratio[i]) - demands[i] )
 
-    _variables =  [x for x in demands if x!=1 ]
-    solutions = solve_poly_system(poly_eqs, *_variables)
+    _variables =  [ x for x in demands if x!=1 ]
+    solutions = nonlinsolve(poly_eqs, _variables)
     print(solutions)
 
     pass
